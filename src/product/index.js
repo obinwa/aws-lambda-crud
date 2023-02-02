@@ -11,7 +11,7 @@ import {
    unmarshall
 } from "@aws-sdk/util-dynamodb";
 import {v4 as uuidv4} from "uuid"; 
-import { dbClient } from "./ddbClient";
+import { dbClient } from "./ddbClient.js";
 
 export const handler = async function (event) {
   console.log("request:", JSON.stringify(event, undefined, 2));
