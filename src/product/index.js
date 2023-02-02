@@ -29,6 +29,7 @@ export const handler = async function (event) {
         else {
           body = await getAllProducts();
         }
+        break;
       case "POST":
         body = await createProduct(event);
         break;
@@ -56,8 +57,8 @@ export const handler = async function (event) {
     return {
       body: JSON.stringify({
         message: `Failed to perform operation."`,
-        errorMsg: e.message,
-        errorStack: e.stack,
+        errorMsg: error.message,
+        errorStack: error.stack,
       })
     };
   }
@@ -73,7 +74,7 @@ const createProduct = async (event) => {
     productRequest.id = productId;
     const params = {
       TableName: process.env.DYNAMODB_TABLE_NAME,
-      Item: marshall(requestBody || {}),
+      Item: marshall(productRequest || {}),
     };
 
     const createResult = await dbClient.send(new PutItemCommand(params));
@@ -127,7 +128,7 @@ const deleteProduct = async (productId) => {
   try {
     const params = {
       TableName: process.env.DYNAMODB_TABLE_NAME,
-      Key: map({id: productId}),
+      Key: marshall({id: productId}),
     };
 
     const deleteResult = await dbClient.send(new DeleteItemCommand(params));
