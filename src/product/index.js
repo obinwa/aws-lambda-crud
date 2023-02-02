@@ -16,35 +16,51 @@ import { dbClient } from "./ddbClient";
 export const handler = async function (event) {
   console.log("request:", JSON.stringify(event, undefined, 2));
   let body;
-  // TODO — switch case event.http method to perform CRUD operations with using dbClient object
-  switch (event.httpMethod) {
-    case "GET":
-      if (event.queryStringParameters != null) {
-        body = await getProductsByCategory(event);
-      } 
-      else if (event.pathParameters != null) {
-        body = await getProduct(event.pathParameters.id);
-      } else {
-        body = await getAllProducts();
-      }
-    case "POST":
-      body = await createProduct(event);
-      break;
-    case "DELETE":
-      body = await deleteProduct(event.pathParameters.id);
-      break;
-    case "PUT":
-      body = await updateProduct(event);
-      break;
-    default:
-      throw new Error(`Unsupported route: "${event.httpMethod}"`);  
-  }
 
-  return {
-    statusCode: 200,
-    headers: { "Content-Type": "text/plain" },
-    body: `Hello from Product ! You’ve hit ${event.path}\n`,
-  };
+  try {
+    switch (event.httpMethod) {
+      case "GET":
+        if (event.queryStringParameters != null) {
+          body = await getProductsByCategory(event);
+        } 
+        else if (event.pathParameters != null) {
+          body = await getProduct(event.pathParameters.id);
+        }
+        else {
+          body = await getAllProducts();
+        }
+      case "POST":
+        body = await createProduct(event);
+        break;
+      case "DELETE":
+        body = await deleteProduct(event.pathParameters.id);
+        break;
+      case "PUT":
+        body = await updateProduct(event);
+        break;
+      default:
+        throw new Error(`Unsupported route: "${event.httpMethod}"`);  
+    }
+
+    console.log(body);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        message: `Successfully finished operation: "${event.httpMethod}"`,
+        body: body
+      })
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      body: JSON.stringify({
+        message: `Failed to perform operation."`,
+        errorMsg: e.message,
+        errorStack: e.stack,
+      })
+    };
+  }
 };
 
 const createProduct = async (event) => {
